@@ -202,12 +202,12 @@ const categories = ["All", ...uniqueCategories];  // Add "All" option to the beg
   }
 
   // Format price.
-  function formatPrice(product) {
-    return `${product.currency || "INR"} ${(
-      (product.price || 0) / 100
-    ).toFixed(2)}`;
-  }
-
+ function formatPrice(product) {
+  return `₹${(product.price || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
   // Display one product card.
   function displayCard(product) {
     const productId = getProductId(product);
