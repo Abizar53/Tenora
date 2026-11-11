@@ -1,0 +1,249 @@
+
+.edit-product-page {
+    min-height: 100vh;
+    background: #F5F8FF;
+    color: #312E81;
+    padding-bottom: 40px;
+}
+
+/* HEADER */
+
+.edit-header {
+    background: #DCE7FF;
+    padding: 20px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #C7D7F5;
+}
+
+.edit-header h1 {
+    margin: 0;
+    font-size: 25px;
+    color: #312E81;
+}
+
+.edit-header p {
+    margin: 4px 0 0;
+    color: #435A9C;
+    font-size: 13px;
+}
+
+    .edit-back-button {
+        background: #FFFFFF;
+        border: 1px solid #C7D7F5;
+        padding: 10px 16px;
+        border-radius: 7px;
+        cursor: pointer;
+        color: #312E81;
+    }
+
+/* MAIN CONTAINER */
+
+.edit-product-container {
+    max-width: 1050px;
+    margin: 35px auto;
+    padding: 0 20px;
+}
+
+.edit-title {
+    margin-bottom: 25px;
+}
+
+.edit-title h2 {
+    font-size: 27px;
+    margin-bottom: 7px;
+    color: #312E81;
+}
+
+.edit-title p {
+    color: #435A9C;
+    margin: 0;
+}
+
+/* FORM */
+
+.edit-product-form {
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 3px 15px rgba(67, 90, 156, 0.08);
+}
+
+.form-section {
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid #DCE7FF;
+}
+
+.form-section h3 {
+    font-size: 17px;
+    margin: 0 0 22px;
+    color: #312E81;
+}
+
+/* TWO COLUMN GRID */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #312E81;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #C7D7F5;
+    border-radius: 7px;
+    background: #FFFFFF;
+    color: #334155;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #8CAAE8;
+    box-shadow: 0 0 0 3px rgba(140, 170, 232, 0.18);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-group small {
+    color: #64748B;
+    font-size: 12px;
+}
+
+/* AVAILABILITY */
+
+.availability-group {
+    justify-content: center;
+}
+
+.availability-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: normal !important;
+}
+
+.availability-checkbox input {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #4338CA;
+}
+
+/* IMAGE PREVIEW */
+
+.edit-image-preview {
+    margin-top: 15px;
+}
+
+.edit-image-preview img {
+    width: 140px;
+    height: 120px;
+    object-fit: contain;
+    border: 1px solid #DCE7FF;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+/* MESSAGE */
+
+.edit-message {
+    color: #4338CA;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* BUTTONS */
+
+.edit-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.edit-cancel-button,
+.edit-save-button {
+    padding: 12px 22px;
+    border-radius: 7px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.edit-cancel-button {
+    background: #FFFFFF;
+    border: 1px solid #C7D7F5;
+    color: #312E81;
+}
+
+.edit-save-button {
+    background: #4338CA;
+    border: 1px solid #4338CA;
+    color: #FFFFFF;
+}
+
+.edit-save-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* MOBILE RESPONSIVENESS */
+
+@media (max-width: 650px) {
+    .edit-header {
+        padding: 16px 5%;
+    }
+
+    .edit-product-container {
+        margin: 25px auto;
+        padding: 0 12px;
+    }
+
+    .edit-product-form {
+        padding: 20px 15px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+
+    .edit-form-actions {
+        flex-direction: column-reverse;
+    }
+
+    .edit-cancel-button,
+    .edit-save-button {
+        width: 100%;
+    }
+}
