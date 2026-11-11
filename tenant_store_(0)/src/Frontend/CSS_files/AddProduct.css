@@ -1,0 +1,263 @@
+
+/* ===== Main Add Product Page ===== */
+
+.add-product-page {
+    min-height: 100vh;
+    background: #F5F8FF;
+    color: #334155;
+    font-family: Arial, sans-serif;
+}
+
+/* ===== Header ===== */
+
+.add-product-header {
+    min-height: 76px;
+    padding: 16px 6%;
+    background: #DCE7FF;
+    color: #312E81;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    border-bottom: 1px solid #C7D7F5;
+    box-shadow: 0 3px 12px rgba(49, 46, 129, 0.05);
+}
+
+.add-product-header h1 {
+    font-size: 25px;
+    font-weight: 700;
+    margin: 0;
+    color: #312E81;
+}
+
+/* ===== Back Button ===== */
+
+.back-button {
+    padding: 10px 18px;
+    border: 1px solid #C7D7F5;
+    border-radius: 8px;
+    background: #FFFFFF;
+    color: #4338CA;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.back-button:hover {
+    background: #EEF2FF;
+    transform: translateY(-2px);
+}
+
+/* ===== Form Container ===== */
+
+.add-product-container {
+    max-width: 760px;
+    margin: 40px auto;
+    padding: 35px;
+    background: #FFFFFF;
+    border: 1px solid #DCE7FF;
+    border-top: 4px solid #8CAAE8;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(49, 46, 129, 0.06);
+}
+
+.add-product-container h2 {
+    margin: 0 0 10px;
+    font-size: 28px;
+    color: #312E81;
+}
+
+.form-description {
+    color: #64748B;
+    margin-bottom: 28px;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+/* ===== Product Form ===== */
+
+.product-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.product-form h3 {
+    color: #312E81;
+    font-size: 18px;
+    margin: 12px 0 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #DCE7FF;
+}
+
+.product-form h4 {
+    color: #435A9C;
+    font-size: 15px;
+    margin: 5px 0 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.form-group label {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* ===== Form Inputs ===== */
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #C7D7F5;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    background: #FFFFFF;
+    color: #334155;
+    box-sizing: border-box;
+    transition: 0.3s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #94A3B8;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #8CAAE8;
+    box-shadow: 0 0 0 3px rgba(140, 170, 232, 0.15);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+/* ===== Checkbox ===== */
+
+.form-group input[type="checkbox"] {
+    width: auto;
+    accent-color: #435A9C;
+    cursor: pointer;
+}
+
+/* ===== Additional Information ===== */
+
+.form-group small {
+    color: #64748B;
+    font-size: 12px;
+}
+
+/* ===== Price, Stock and Dimensions Row ===== */
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+/* ===== Form Actions ===== */
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.save-product-button,
+.cancel-button {
+    padding: 12px 20px;
+    border: 1px solid #C7D7F5;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+/* Save Button */
+
+.save-product-button {
+    background: #DCE7FF;
+    color: #312E81;
+}
+
+.save-product-button:hover:not(:disabled) {
+    background: #C7D7F5;
+    transform: translateY(-2px);
+}
+
+.save-product-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Cancel Button */
+
+.cancel-button {
+    background: #F1F5F9;
+    color: #475569;
+    border-color: #E2E8F0;
+}
+
+.cancel-button:hover {
+    background: #E2E8F0;
+    transform: translateY(-2px);
+}
+
+/* ===== Success and Error Message ===== */
+
+.form-message {
+    padding: 12px 15px;
+    background: #EEF2FF;
+    border: 1px solid #C7D2FE;
+    border-radius: 8px;
+    color: #4338CA;
+    font-size: 14px;
+}
+
+/* ===== Responsive Design ===== */
+
+@media (max-width: 600px) {
+    .add-product-container {
+        margin: 20px 12px;
+        padding: 22px 18px;
+    }
+
+    .add-product-container h2 {
+        font-size: 24px;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    .add-product-header {
+        padding: 16px 20px;
+    }
+
+    .add-product-header h1 {
+        font-size: 21px;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .save-product-button,
+    .cancel-button {
+        width: 100%;
+    }
+}
