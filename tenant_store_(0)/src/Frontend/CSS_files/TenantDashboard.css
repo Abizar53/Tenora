@@ -1,0 +1,229 @@
+
+/* ===== Main Dashboard ===== */
+
+.dashboard-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f4ff, #f8f9ff);
+    color: #1e293b;
+    font-family: Arial, sans-serif;
+}
+
+/* ===== Header ===== */
+
+.dashboard-header {
+    min-height: 76px;
+    padding: 16px 6%;
+    background: linear-gradient(120deg, #312e81, #4f46e5, #7c3aed);
+    color: white;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    box-shadow: 0 4px 15px rgba(49, 46, 129, 0.15);
+}
+
+.dashboard-header h1 {
+    font-size: 26px;
+    margin: 0;
+}
+
+.dashboard-header button {
+    padding: 11px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    background: white;
+    color: #4338ca;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.dashboard-header button:hover {
+    background: #ede9fe;
+    transform: translateY(-2px);
+}
+
+/* ===== Dashboard Content ===== */
+
+.dashboard-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 48px 24px;
+}
+
+.dashboard-label {
+    display: inline-block;
+    color: #5b21b6;
+    background: #ede9fe;
+    padding: 8px 14px;
+    border-radius: 20px;
+
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    margin-bottom: 15px;
+}
+
+.dashboard-content h2 {
+    font-size: 30px;
+    margin: 0 0 12px;
+    color: #312e81;
+}
+
+.dashboard-description {
+    color: #64748b;
+    margin-bottom: 35px;
+    line-height: 1.6;
+    font-size: 15px;
+}
+
+/* ===== Dashboard Grid ===== */
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 25px;
+}
+
+/* ===== Dashboard Cards ===== */
+
+.dashboard-card {
+    background: white;
+    padding: 27px;
+    border-radius: 16px;
+    border: 1px solid #e0e7ff;
+    border-top: 5px solid #6366f1;
+
+    box-shadow: 0 5px 18px rgba(30, 41, 59, 0.06);
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 14px 30px rgba(79, 70, 229, 0.14);
+    border-top-color: #8b5cf6;
+}
+
+/* ===== Card Icons ===== */
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(120deg, #ede9fe, #dbeafe);
+    border-radius: 12px;
+    font-size: 23px;
+    margin-bottom: 20px;
+}
+
+/* ===== Card Content ===== */
+
+.dashboard-card h3 {
+    color: #312e81;
+    font-size: 20px;
+    margin-bottom: 12px;
+}
+
+.dashboard-card p {
+    color: #64748b;
+    line-height: 1.6;
+    font-size: 14px;
+    margin-bottom: 22px;
+    min-height: 45px;
+}
+
+/* ===== Card Buttons ===== */
+
+.card-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.dashboard-card button {
+    padding: 11px 16px;
+    border: none;
+    border-radius: 8px;
+
+    background: linear-gradient(120deg, #4f46e5, #7c3aed);
+    color: white;
+
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card button:hover:not(:disabled) {
+    background: linear-gradient(120deg, #4338ca, #6d28d9);
+    transform: translateY(-2px);
+}
+
+.dashboard-card button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* ===== Login Message ===== */
+
+.login-message {
+    max-width: 450px;
+    margin: 100px auto;
+    padding: 35px;
+    text-align: center;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e0e7ff;
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.1);
+}
+
+.login-message h2 {
+    color: #312e81;
+    font-size: 20px;
+    margin-bottom: 22px;
+}
+
+.login-message button {
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(120deg, #4f46e5, #7c3aed);
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ===== Responsive Design ===== */
+
+@media (max-width: 900px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-content {
+        padding: 32px 18px;
+    }
+
+    .dashboard-content h2 {
+        font-size: 25px;
+    }
+
+    .dashboard-header {
+        padding: 16px 20px;
+    }
+
+    .dashboard-card {
+        padding: 22px;
+    }
+}
