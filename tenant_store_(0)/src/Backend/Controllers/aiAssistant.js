@@ -28,16 +28,17 @@ async function aiAssistant(request,response) {
             try{
             
                 const requestdata=JSON.parse(body)   //frontend sends a request, the backend receives the data from the request body
-
-                if(!Array.isArray(requestdata.message)    //array because a chatbot conversation contains multiple messages, not just one message
-                || requestdata.message.length==0 // checks empty
-                || requestdata.message.length>20 ){  // Checks whether the array contains more than 20 messages, because of api token limits and billing
+                const context = requestdata.context || {};
+                console.log("Context received by backend:", context);
+                if(!Array.isArray(requestdata.messages)    //array because a chatbot conversation contains multiple messages, not just one message
+                || requestdata.messages.length==0 // checks empty
+                || requestdata.messages.length>20 ){  // Checks whether the array contains more than 20 messages, because of api token limits and billing
                     response.writeHead(400,{"Content-Type":"application/json"})
                     response.end(JSON.stringify({message:"Invalid chat message"}))
                     return ;
                 }
         
-                const conversation = requestdata.message.slice(-10)   // keeping only the recent 10 ocnversation (if there are 5 , all 5 will be kept
+                const conversation = requestdata.messages.slice(-10)   // keeping only the recent 10 ocnversation (if there are 5 , all 5 will be kept
                 
                
                 // validate individual message length
@@ -51,31 +52,114 @@ async function aiAssistant(request,response) {
             }
 
         // now preparing the messsage for LLM
-        const messages=[{
+         //${JSON.stringify(context, null, 2)} it have java script objet so convert itno string and add some spaces ,this  feed the model the product info we are working on
+        // Your current page is: ${context.page || "unknown"}---> to identify which product we are in
+         const messages=[{
              role: "system",
-                        content: ` You are Tenora's AI Product Assistant.
+             content: ` You are Tenora's AI Product  for a multi-tenant e-commerce platform.
+            Your job is to help tenants understand e-commerce concepts, manage their stores, and create or improve product listings.
 
-                            Help tenants create better product listings.
+            You will receive context about the current page and, when available, the current product.
 
-                            You can suggest:
-                            - Product names
-                            - Short descriptions
-                            - Detailed descriptions
-                            - Product categories
-                            - Relevant product tags
+            CURRENT CONTEXT:
+            ${JSON.stringify(context, null, 2)}
 
-                            Use only the product information provided
-                            by the tenant.
+            PAGE-SPECIFIC BEHAVIOUR:
+                     1. DASHBOARD:
+                    - Answer general questions about e-commerce, store management, marketing, SEO, and business improvement.
+                    - Provide practical suggestions to help tenants manage and grow their stores.
+                    - Do not generate product-field suggestions unless the tenant explicitly requests one.
 
-                            Never invent product specifications,
-                            ingredients, certifications, dimensions,
-                            weight, or other factual details.
+                    2. ADD PRODUCT:
+                    - Help tenants understand product listing concepts such as SKU, category, tags, pricing, descriptions, and product specifications.
+                    - Answer general questions clearly.
+                    - When the tenant explicitly asks you to create a particular product field, provide a structured suggestion for that field.
 
-                            If important information is missing,
-                            ask the tenant for clarification.
+                    3. EDIT PRODUCT:
+                    - Help tenants understand product-related concepts and improve existing product listings.
+                    - Use the provided product information when answering questions about the current product.
+                    - When the tenant explicitly asks you to improve or rewrite a particular product field, provide a structured suggestion for that field.
 
-                            Keep your responses clear and useful  `
-                    },
+                    RESPONSE RULES:
+
+                    1. GENERAL QUESTIONS:
+                    If the tenant asks a question such as:
+                    - What is SEO?
+                    - What does SKU mean?
+                    - How do product tags work?
+
+                    Answer normally in the reply property and set suggestion to null.
+
+                        
+                    2. GENERAL ADVICE:
+                    If the tenant asks for advice, such as:
+                    - How can I improve my store?
+                    - How can I make my product more attractive?
+
+                    Provide useful guidance in the reply property.
+                    Set suggestion to null unless the tenant explicitly requests a concrete product-field suggestion.
+
+                    3. PRODUCT-FIELD SUGGESTIONS:
+                    If the tenant explicitly asks you to create, rewrite, or improve a particular product field:
+                    - Generate the suggested content.
+                    - Identify the exact field being suggested.
+                    - Return the suggestion in the required structure.
+                    - Include a short explanation in the reply property.
+
+                    ALLOWED PRODUCT FIELDS:
+                    - name
+                    - shortDescription
+                    - description
+                    - category
+                    - tags
+
+                    FIELD VALUE RULES:
+                    - tags must be an array of strings.
+                    - All other allowed fields must be strings.
+                    - Suggest only one field at a time.
+                    - Never suggest changing product IDs, tenant IDs, or ownership information.
+                    - Do not invent product specifications, certifications, ingredients, or other factual details.
+                    - Use existing product information as context.
+                    - If important information is missing, ask the tenant for clarification instead of inventing details.
+
+                    IMPORTANT:
+                   
+                    - Never claim that a suggestion has already been applied or saved.
+                    - The tenant must review and manually apply every suggestion.
+                    - If the tenant asks a general question, do not generate an unnecessary product-field suggestion.
+
+                    OUTPUT FORMAT:
+
+                    Always return a valid JSON object with exactly these two properties:
+
+                    {
+                        "reply": "Your response to the tenant",
+                        "suggestion": null
+                    }
+
+                    When providing a product-field suggestion, return:
+
+                    {
+                        "reply": "Here is my suggested product description.",
+                        "suggestion": {
+                            "field": "description",
+                            "value": "Your suggested description here"
+                        }
+                    }
+
+                    For tags, return an array:
+
+                    {
+                        "reply": "Here are some suggested tags.",
+                        "suggestion": {
+                            "field": "tags",
+                            "value": ["tag1", "tag2", "tag3"]
+                        }
+                    }
+
+                    Return JSON only.
+                    Do not use Markdown code fences around the JSON.
+                    `},
 
                     ...conversation.map(message => ({
                         role: message.role,     // takes the role from the existing object.
@@ -113,17 +197,54 @@ async function aiAssistant(request,response) {
         // if everything is alright then EXTRACT GENERATED RESPONSE
         const groqReply =  groqData.choices?.[0]?.message?.content; // choices : array of generated choices, contain multiple generated answer ......optional chaining if it exist then next, if null,undefined encountered then rthe expression stops and returns undefined instead of throwing an error
 
-                if (!groqReply) { response.writeHead(502, { "Content-Type": "application/json"
+               // Check whether Groq returned a response
+                if (!groqReply) {
+                    response.writeHead(502, {
+                        "Content-Type": "application/json"
                     });
-                    response.end(JSON.stringify({  message: "AI returned an empty response."
-                    }));
-                    return    }
 
-                
+                    response.end(JSON.stringify({
+                        message: "AI returned an empty response."
+                    }));
+
+                    return;
+                }
+
+        // Convert the AI's JSON string into a JavaScript object
+        const aiResponse = JSON.parse(groqReply);
+
+        // Allow only supported product fields
+        const allowedFields = [
+            "name",
+            "shortDescription",
+            "description",
+            "category",
+            "tags"
+        ];
+
+        let suggestion = null;
+
+        if (
+            aiResponse.suggestion &&
+            allowedFields.includes(aiResponse.suggestion.field)
+        ) {
+            const { field, value } = aiResponse.suggestion;
+
+            const validValue =
+                field === "tags"
+                    ? Array.isArray(value) &&
+                    value.every(tag => typeof tag === "string")
+                    : typeof value === "string";
+
+            if (validValue) {
+                suggestion = { field, value };
+            }
+        }             
 
         // finally we are sending the response to frontend 
         response.writeHead(200,{ "Content-Type":"application/json"})
-        response.end(JSON.stringify({ message: groqReply }))
+        response.end(JSON.stringify({ message: aiResponse.reply || "Here is my response.",
+                suggestion: suggestion}))
 
 
 
