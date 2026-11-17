@@ -5,6 +5,7 @@ import AddProduct from "./Frontend/Pages/AddProduct";
 import Products from "./Frontend/Pages/products";
 import ViewProducts from "./Frontend/Pages/ViewProducts.jsx";
 import EnquiryPage from "./Frontend/Pages/enquiry.jsx"
+import EditProduct from "./Frontend/Pages/EditProduct.jsx";
 
 function Run(){
     return (

@@ -1,7 +1,9 @@
 import {useState} from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
  import "../CSS_files/EditProduct.css";
-import logout from "../utills/logout";
+import logout from "../utils/logout";
+
+import ChatLayout from "./ChatBot/ChatLayout.jsx";
 
 
  function EditProduct() {
@@ -132,12 +134,36 @@ console.log("Updated fields keys:", Object.keys(updatedFields));
         )
     }
 
-return (
-    <>   
-          <div className="edit-product-page">
+function handleApplySuggestion(field, value) {
 
-            <header className="edit-header">
-                <div>
+    // Update the product form
+    setProduct((previousProduct) => ({
+        ...previousProduct,
+        [field]: value
+    }));
+
+    // Track the field for the existing PATCH request
+    setUpdatedFields((previousFields) => ({
+        ...previousFields,
+        [field]: value
+    }));
+}
+
+
+
+
+    return (
+        <ChatLayout context={{ 
+        page:"edit-product",
+        product:product
+       }}onApplySuggestion={handleApplySuggestion}>  {/* product={product} because: ChatLayout needs access to the current product's information page for identifying which page is chat open*/}
+       {/*one bracket for expression : props, another for js object passing */}
+       {/*han*/}
+
+            <div className="edit-product-page">
+
+                <header className="edit-header">
+                    <div>
                     <h1>Tenora</h1>
                     <p>Product Management</p>
                 </div>
@@ -398,7 +424,8 @@ return (
 
  </main>
         </div>
-</>
+
+        </ChatLayout>
 
 )
 }

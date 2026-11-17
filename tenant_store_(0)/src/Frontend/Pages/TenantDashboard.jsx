@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {useNavigate} from "react-router-dom"  //lets you navigate between pages programmatically.
 import "../CSS_files/TenantDashboard.css"
-import logout from "../utills/logout";
+import logout from "../utils/logout";
 
 function TenantDashboard(){
     const navigate=useNavigate() 
