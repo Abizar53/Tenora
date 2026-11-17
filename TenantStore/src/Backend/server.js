@@ -6,9 +6,10 @@ import {fetchEnquiries, updateEnquiryStatus} from "./routes/enquiryhandler.js"
 import Edit from "./routes/editProduct.js"
 import aiAssistant from "./Controllers/aiAssistant.js"
 import mongoose from "mongoose"
+import dotenv from "dotenv"
 
-const PORT=4052   
-mongoose.connect("mongodb://localhost:27017/Project")
+dotenv.config()   
+mongoose.connect(process.env.MONGODB_URI)
     .then(()=>{ console.log("Mongodb connected successfully")})
     .catch((error)=> console.log("MongoDB connection failed:", error.message))
     
@@ -100,6 +101,6 @@ if( request.method=="POST" && request.url === "/api/ai-assistant"){
 
 
 
-server.listen(PORT,()=>{
-    console.log("Node js server running on http://localhost:4052")
+server.listen(()=>{
+    console.log("Node js server running on https://tenora-7c00.onrender.com/ ")
 })
