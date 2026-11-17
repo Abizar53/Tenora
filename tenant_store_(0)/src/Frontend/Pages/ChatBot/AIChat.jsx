@@ -2,42 +2,85 @@
 import { useState } from "react";
 import "./AIChat.css";
 
-function AIChat({ product ,isOpen,setIsOpen}) {  // this function receives a prop named product from its parent component.
+function AIChat({ context ,isOpen,setIsOpen, onApplySuggestion}) {  // this function receives a prop named product from its parent component.
 
     // Stores the message currently being typed
     const [input, setInput] = useState("")
 
     // Stores the conversation
-    const [messages, setMessages] = useState([
+    const [message, setMessages] = useState([
         {
             role: "assistant",
-            text: "Hello! I'm your AI Product Assistant. How can I help you improve your product?"
+            content: "Hello! I'm your AI Product Assistant. How can I help you improve your product?"
         }
     ])
 
     // Send a message
-    function handleSend(event) {
+    async function handleSend(event) {
         event.preventDefault()
         const userMessage = input.trim() // stores the user typed message and trim it remove extra spaces
         if (userMessage === "") {
             return;
         }
+
+        // Add user's message to conversation
+    const updatedMessages = [
+        ...message,
+        {
+            role: "user",
+            content: userMessage
+        }
+    ];
+
+    setMessages(updatedMessages);
     
         setInput("")  // Clear the input
 
-        // updaing  the conversation
+        try{
+            const token =sessionStorage.getItem("token")
+            console.log("Context being sent:", context);
+            const response =await fetch("http://localhost:4052/api/ai-assistant",{
+                method:"POST",
+                headers:{  "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                messages:updatedMessages.filter((message)=>message.role !="system"),
+                context:context
+            })
+            })
+            const data= await response.json()
+            if (!response.ok) {
+            throw new Error(data.message || "Unable to get AI response")  }
+        
+
+        // add AI response to conversation
         setMessages((previousMessages) => [
             ...previousMessages,   // copies all existing messages into the new array
             {
-                role: "user",
-                text: userMessage
-            },
-            {
                 role: "assistant",
-                text: "The AI service is not connected yet. We'll connect the LLM API in the next stage."
-            }
-        ])
+                content: data.message,
+                suggestion: data.suggestion
+            },
+           ])
+    }catch (error) {
+        console.error("AI Chat Error:", error);
     }
+}
+
+function handleReset() {  // this clears the conversation history
+    // Clear existing conversation and restore the welcome message
+    setMessages([
+        {
+            role: "assistant",
+            content: "Hello! I'm your AI Product Assistant. How can I help you improve your product?"
+        }
+    ]);
+
+    // Clear anything typed in the input
+    setInput("");
+}
+
 
     return (
        <div className={`ai-chat-container ${isOpen ? "open" : ""}`}>
@@ -55,37 +98,79 @@ function AIChat({ product ,isOpen,setIsOpen}) {  // this function receives a pro
                 <div className="ai-chat-sidebar">
 
                     {/* Header */}
-                    <div className="ai-chat-header">
-                        <div>
-                            <h3>AI Assistant</h3>
-                            <p>Product assistance</p>
-                        </div>
+<div className="ai-chat-header">
+    <div>
+        <h3>AI Assistant</h3>
+        <p>Product assistance</p>
+    </div>
 
-                        <button
-                            type="button"
-                            onClick={() => setIsOpen(false)}
-                        >
-                            ×
-                        </button>
-                    </div>
+    <div className="ai-chat-header-buttons">
+
+        {/* Reset conversation */}
+        <button
+            type="button"
+            onClick={handleReset}
+            title="Reset chat"
+        >
+            ↻
+        </button>
+
+        {/* Close chat */}
+        <button
+            type="button"
+            onClick={() => setIsOpen(false)}
+            title="Close chat"
+        >
+            ×
+        </button>
+
+    </div>
+</div>
 
                     {/* Current product context */}
                     <div className="ai-product-context">
                         <span>Working on</span>
-                        <strong>{product?.name || "Your product"}</strong>
+                        <strong>{context?.product?.name || "Your product"}</strong>
                     </div>
 
                     {/* Conversation messages */}    {/*  displaying conversation mssages */}
                     <div className="ai-chat-messages">
                  {/* map() generates one for every object in your array soo don't have to write each div manually */}      
-                  {messages.map((message, index) => (    
+                  {message.map((message, index) => (    
                             <div
                                 key={index}
                                 className={`ai-message ${message.role}`}
                             >
-                                {message.text}
+                                {/* AI's normal response */}
+                                {message.content}
+                        
+                                   {/* Product field suggestion */}
+                                {message.suggestion && (
+                                    <div className="suggestion-container">
+
+                                        {/* Display suggested value */}
+                                        <p className="suggestion-value">
+                                            {message.suggestion.value}
+                                        </p>
+
+                                        {/* Apply suggestion button */}
+                                        <button
+                                            type="button"
+                                            className="apply-suggestion-btn"
+                                            onClick={() => onApplySuggestion(
+                                                message.suggestion.field,
+                                                message.suggestion.value
+                                            )}
+                                        >
+                                            <span>✦</span> Apply Suggestion
+                                        </button>
+
+                                    </div>
+                                )}
+
                             </div>
                         ))}
+
                     </div>
 
                     {/* Message input */}

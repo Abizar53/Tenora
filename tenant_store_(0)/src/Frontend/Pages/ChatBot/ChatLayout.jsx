@@ -2,7 +2,7 @@ import { useState } from "react";
 import AIChat from "./AIChat";
 import "./ChatLayout.css";
 
-function ChatLayout ({children,product}) { {/*children is a special prop provided by React*/}
+function ChatLayout ({children,context,onApplySuggestion}) { {/*children is a special prop provided by React*/}
     const [isOpen,setIsOpen]= useState(false)  // control visibility of the chatbot buton
    // setting Both the page content and chatbot inside the same parent 
     return(
@@ -20,10 +20,12 @@ function ChatLayout ({children,product}) { {/*children is a special prop provide
              {/* product: current product info */}
               {/* isOpen: current Chabot visibility state */}
                 {/* setIsOpen: change chatbot visbility */}
+                {/* onApplySuggestion:  create a button with click on it , the form gets the suggested values*/}
             <AIChat    
-                product={product}   
+                context={context}   
                 isOpen={isOpen}       
                 setIsOpen={setIsOpen} 
+                onApplySuggestion={onApplySuggestion}
             />
 
             </div>
