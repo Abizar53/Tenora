@@ -9,6 +9,7 @@ import mongoose from "mongoose"
 import dotenv from "dotenv"
 
 dotenv.config()   
+const PORT = process.env.PORT || 4052;
 mongoose.connect(process.env.MONGODB_URI)
     .then(()=>{ console.log("Mongodb connected successfully")})
     .catch((error)=> console.log("MongoDB connection failed:", error.message))
@@ -101,6 +102,6 @@ if( request.method=="POST" && request.url === "/api/ai-assistant"){
 
 
 
-server.listen(()=>{
-    console.log("Node js server running on https://tenora-7c00.onrender.com/ ")
+server.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running on port ${PORT}`);
 })

@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "nodemon ./src/Backend/server.js"
+    "start": "node ./src/Backend/server.js"
   },
   "dependencies": {
     "dotenv": "^18.0.9",
