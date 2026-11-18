@@ -16,10 +16,16 @@ mongoose.connect(process.env.MONGODB_URI)
     
 const server=http.createServer((request,response)=>{
     console.log("Incoming request:", request.method, request.url)
-    //allow request from react development server
-    response.setHeader("Access-Control-Allow-Origin","http://localhost:5173")
+    //allow request from local, deployed frontend 
+    const allowedOrigin=["http://localhost:5173","https://tenora-beta.vercel.app"]     //reate an array containing the frontend URLs that are allowed to communicate with our backend
+    const origin= request.headers.origin     // when frontend sends a request to backend, the browser includes an HTTP header called Origin, and this line exracts the value and stores it in the origin variable
+    if(allowedOrigin.includes(origin)){      // check is the value exists
+    response.setHeader("Access-Control-Allow-Origin",origin)   //This tells the browser which origin is allowed to access the response, : sending actual origin value
+    }
+    response.setHeader("Vary", "Origin")       //tells caching systems that the response can change depending on the request's Origin
     response.setHeader("Access-Control-Allow-Methods","GET,POST,PATCH,OPTIONS")
     response.setHeader("Access-Control-Allow-Headers","Content-Type, Authorization")
+    response.setHeader("Access-Control-Allow-Credentials", "true");
 
     //Handle browser CORS preflight Request
     if (request.method === "OPTIONS"){
