@@ -11,7 +11,7 @@ function Products() {
             const token = sessionStorage.getItem("token");
             
             try {
-                const response = await fetch("http://localhost:4052/api/products",{
+                const response = await fetch("https://tenora-7c00.onrender.com/api/products",{
                     method: 'GET', headers:{
                         "Authorization" : `Bearer ${token}` }
                     } );

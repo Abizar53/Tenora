@@ -39,7 +39,7 @@ function AIChat({ context ,isOpen,setIsOpen, onApplySuggestion}) {  // this func
         try{
             const token =sessionStorage.getItem("token")
             console.log("Context being sent:", context);
-            const response =await fetch("http://localhost:4052/api/ai-assistant",{
+            const response =await fetch("https://tenora-7c00.onrender.com/api/ai-assistant",{
                 method:"POST",
                 headers:{  "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`

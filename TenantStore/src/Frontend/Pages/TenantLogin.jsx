@@ -19,7 +19,7 @@ function TenantLogin(){
         setLoading(true)    // indicate request has started 
         try{
             const response =await fetch(     // fetch: http request to server , api.auth/login is login end point defined in both react and node
-                "http://localhost:4052/api/auth/login",
+                "https://tenora-7c00.onrender.com/api/auth/login",
                 {
                     method:"POST",    
                     headers:{"content-Type":"application/json"},    // tells backend that request body contain JSON Data

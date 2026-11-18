@@ -28,7 +28,7 @@ function EnquiryPage(){
         try{
             const token = sessionStorage.getItem("token")
 
-            const response= await fetch("http://localhost:4052/api/enquiries",
+            const response= await fetch("https://tenora-7c00.onrender.com/api/enquiries",
                 {
                     method: "GET",
                     headers: { Authorization: `Bearer ${token}` }
@@ -64,7 +64,7 @@ function EnquiryPage(){
         try{
             setUpdating(true);
             const token = sessionStorage.getItem("token");
-            const response = await fetch(`http://localhost:4052/api/enquiries/${selectedEnquiry._id}/status`, {
+            const response = await fetch(`https://tenora-7c00.onrender.com/api/enquiries/${selectedEnquiry._id}/status`, {
                 method: "PATCH",
                 headers:{
                     "Content-Type": "application/json",

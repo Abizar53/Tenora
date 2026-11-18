@@ -44,7 +44,7 @@ async function handleSubmit(event) {
     return;
 }
     const response = await fetch(
-      "http://localhost:4052/api/products",
+      "https://tenora-7c00.onrender.com/api/products",
       {
         method: "POST",
         headers: {

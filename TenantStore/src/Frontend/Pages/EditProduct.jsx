@@ -88,7 +88,7 @@ async function handleSubmit(event) {
 console.log("Product:", product);
 console.log("Updated fields:", updatedFields);
 console.log("Updated fields keys:", Object.keys(updatedFields));
-    const response = await fetch(`http://localhost:4052/api/products/${id}`, {
+    const response = await fetch(`https://tenora-7c00.onrender.com/api/products/${id}`, {
         method: 'PATCH', headers: {
         "Content-Type": "application/json",
         "Authorization":`Bearer ${token}` }, 
@@ -109,10 +109,8 @@ console.log("Updated fields keys:", Object.keys(updatedFields));
 }
     } else {
         setMessage("Product updated successfully!");
-        // Navigate back to the products page after a short delay
-        setTimeout(() => {
-            navigate("/view-products");
-        }, 1000);
+       // Navigate immediately to the products page
+        navigate("/view-products");
     }
 
     } catch (error) {

@@ -15,7 +15,7 @@ function ViewProducts() {
                 const token = sessionStorage.getItem("token");
                
                 const response = await fetch(
-                    "http://localhost:4052/api/products",
+                    "https://tenora-7c00.onrender.com/api/products",
                     {
                         method: "GET",
                         headers: {
