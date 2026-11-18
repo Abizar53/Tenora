@@ -179,7 +179,11 @@ async function aiAssistant(request,response) {
             body:JSON.stringify({
                 model:"openai/gpt-oss-120b",  //Specifies which AI model Groq should use to generate the response
                 messages:messages,      //Sends the conversation array we created earlier
-                max_completion_tokens: 500, //Sets the maximum number of tokens the model can generate in its response
+                max_completion_tokens: 1000, //Sets the maximum number of tokens the model can generate in its response
+                // Ask Groq to return valid JSON
+                response_format: { type: "json_object"},
+                // Hide the model's reasoning tokens
+                reasoning_format: "hidden",
             })
         })
         const groqData=await groqResponse.json()  // Without converting the response body into a JavaScript object, we cannot directly access choices, message, and content as JavaScript properties
@@ -193,6 +197,9 @@ async function aiAssistant(request,response) {
 
                     return;
                 }
+        const choice = groqData.choices?.[0];
+
+        console.log("Groq finish reason:", choice?.finish_reason);
 
         // if everything is alright then EXTRACT GENERATED RESPONSE
         const groqReply =  groqData.choices?.[0]?.message?.content; // choices : array of generated choices, contain multiple generated answer ......optional chaining if it exist then next, if null,undefined encountered then rthe expression stops and returns undefined instead of throwing an error
@@ -211,7 +218,23 @@ async function aiAssistant(request,response) {
                 }
 
         // Convert the AI's JSON string into a JavaScript object
-        const aiResponse = JSON.parse(groqReply);
+       let aiResponse;
+
+try {
+    aiResponse = JSON.parse(groqReply);
+} catch (error) {
+    console.error("Invalid JSON from Groq:", groqReply);
+
+    response.writeHead(502, {
+        "Content-Type": "application/json"
+    });
+
+    response.end(JSON.stringify({
+        message: "AI returned an invalid response. Please try again."
+    }));
+
+    return;
+}
 
         // Allow only supported product fields
         const allowedFields = [
