@@ -2,6 +2,7 @@ import { useState } from "react";
 import {useNavigate} from "react-router-dom"  //lets you navigate between pages programmatically.
 import "../CSS_files/TenantDashboard.css"
 import logout from "../utils/logout";
+import ChatLayout from "./ChatBot/ChatLayout";
 
 function TenantDashboard(){
     const navigate=useNavigate() 
@@ -31,6 +32,8 @@ function TenantDashboard(){
     }
 
       return (  // UI Interface
+        <ChatLayout 
+        context={{page:"Dashboard"}}  >
   
     <div className="dashboard-page">
 
@@ -100,6 +103,7 @@ function TenantDashboard(){
             </div>
         </main>
     </div>
+    </ChatLayout>
 );
 
     }

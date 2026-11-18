@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../CSS_files/AddProduct.css";
+import ChatLayout from "./ChatBot/ChatLayout";
 
 function AddProduct() {
   const navigate = useNavigate();
@@ -107,9 +108,26 @@ function handleDimensionChange(event) {
             ...previousProduct.dimensions,
             [name]: value
         }
+    }))
+  }
+
+function handleApplySuggestion(field, value) {
+
+    // Convert tags array into the comma-separated string
+    // expected by the Add Product input.
+    if (field === "tags" && Array.isArray(value)) {
+        value = value.join(", ");
+    }
+
+    setProduct((previousProduct) => ({
+        ...previousProduct,
+        [field]: value
     }));
 }
   return (
+    <ChatLayout context={{
+      page:"add-product",product: product
+    }}  onApplySuggestion={handleApplySuggestion} >
     <div className="add-product-page">
 
       {/* Header */}
@@ -369,6 +387,7 @@ function handleDimensionChange(event) {
         </form>
       </div>
     </div>
+    </ChatLayout>
   );
 }
 
