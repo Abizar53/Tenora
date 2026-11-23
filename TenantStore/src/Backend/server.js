@@ -7,12 +7,19 @@ import Edit from "./routes/editProduct.js"
 import aiAssistant from "./Controllers/aiAssistant.js"
 import mongoose from "mongoose"
 import dotenv from "dotenv"
+import { v2 as cloudinary } from "cloudinary";
+import uploadProductImage from "./Controllers/uploadProductImages.js"
 
 dotenv.config()   
 const PORT = process.env.PORT || 4052;
 mongoose.connect(process.env.MONGODB_URI)
     .then(()=>{ console.log("Mongodb connected successfully")})
     .catch((error)=> console.log("MongoDB connection failed:", error.message))
+
+cloudinary.config({ cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
     
 const server=http.createServer((request,response)=>{
     console.log("Incoming request:", request.method, request.url)
@@ -89,6 +96,11 @@ if (request.method === "PATCH" && request.url.startsWith("/api/products/")){
 // AI assistant
 if( request.method=="POST" && request.url === "/api/ai-assistant"){
     aiAssistant(request,response)
+    return
+}
+// multiple product image upload
+if (request.method ==="POST" && request.url ==="/api/products/images"){
+    uploadProductImage(request,response,cloudinary)
     return
 }
 
