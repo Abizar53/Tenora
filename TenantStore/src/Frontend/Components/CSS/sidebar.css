@@ -1,7 +1,11 @@
 
 .sidebar {
     width: 250px;
-    min-height: 100vh;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    flex-shrink: 0;
+
     background-color: #17243A;
     color: #FFFFFF;
 
@@ -10,13 +14,13 @@
 
     padding: 28px 18px;
     box-sizing: border-box;
+    overflow-y: auto;
 }
-
 /* Logo */
 
 .sidebar-logo {
     padding: 0 12px;
-    margin-bottom: 45px;
+    margin-bottom: 30px;
 }
 
 .sidebar-logo h2 {
@@ -97,7 +101,7 @@
 .sidebar-divider {
     height: 1px;
     background-color: #344259;
-    margin: 28px 10px;
+    margin: 5px 10px;
 }
 
 /* General section */
@@ -110,8 +114,9 @@
 
 .sidebar-logout {
     margin-top: auto;
+    flex-shrink: 0;
     border-top: 1px solid #344259;
-    padding-top: 18px;
+    padding-top: 14px;
 }
 
 .logout-link {

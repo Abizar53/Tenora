@@ -2,8 +2,8 @@
     display: flex;
     min-height: 100vh;
     background-color: #F5F1E8;
+    align-items: flex-start;
 }
-
 .tenant-main {
     flex: 1;
     min-width: 0;
