@@ -1,0 +1,14 @@
+.tenant-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #F5F1E8;
+}
+
+.tenant-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.tenant-content {
+    padding: 30px;
+}
