@@ -11,8 +11,6 @@
     box-sizing: border-box;
 }
 
-/* Page heading */
-
 .enquiries-header {
     margin-bottom: 28px;
 }
@@ -30,11 +28,14 @@
     font-size: 14px;
 }
 
-/* Message */
+/* =====================================
+   MESSAGE
+===================================== */
 
 .enquiry-message {
     padding: 12px 16px;
     margin-bottom: 20px;
+    border: 1px solid #F0D98D;
     border-radius: 8px;
     background: #FFF5D9;
     color: #8A681B;
@@ -107,12 +108,14 @@
 }
 
 /* =====================================
-   ENQUIRIES TABLE
+   TABLE
 ===================================== */
 
 .enquiry-table-container {
     width: 100%;
     overflow-x: auto;
+    border: 1px solid #ECEAE4;
+    border-radius: 10px;
 }
 
 .enquiry-table {
@@ -122,44 +125,86 @@
     white-space: nowrap;
 }
 
+/* Table heading */
+
 .enquiry-table thead {
-    background: #F8F7F3;
+    background: #F7F6F2;
 }
 
 .enquiry-table th {
-    padding: 15px 16px;
+    padding: 16px 18px;
     border-bottom: 1px solid #EAE7DF;
     color: #777D87;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.7px;
 }
 
+/* Table body */
+
 .enquiry-table td {
-    padding: 16px;
+    padding: 18px;
     border-bottom: 1px solid #F0EEE9;
     color: #414B5A;
     font-size: 13px;
 }
 
+/* Product name */
+
+.enquiry-table td:first-child {
+    color: #17243A;
+    font-weight: 600;
+}
+
+/* Customer name */
+
+.enquiry-table td:nth-child(2) {
+    color: #303C4F;
+    font-weight: 600;
+}
+
+/* Email */
+
+.enquiry-table td:nth-child(3) {
+    color: #858A93;
+    font-size: 12px;
+}
+
+/* Date */
+
+.enquiry-table td:last-child {
+    color: #858A93;
+    font-size: 12px;
+}
+
+/* Row hover */
+
 .enquiry-table tbody tr {
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background-color 0.2s ease;
 }
 
 .enquiry-table tbody tr:hover {
-    background: #FFFCF3;
+    background-color: #FFFCF3;
+}
+
+.enquiry-table tbody tr:hover td {
+    color: #17243A;
 }
 
 .enquiry-table tbody tr:last-child td {
     border-bottom: none;
 }
 
+/* Empty state */
+
 .no-enquiries {
-    padding: 35px !important;
+    padding: 40px 20px !important;
     text-align: center;
     color: #858A93 !important;
+    font-size: 14px !important;
+    cursor: default;
 }
 
 /* =====================================
@@ -167,32 +212,54 @@
 ===================================== */
 
 .status-badge {
-    display: inline-block;
-    padding: 6px 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
 }
+
+/* Status dot */
+
+.status-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* New */
 
 .status-new {
     background: #E8F0FF;
     color: #3764B5;
 }
 
+/* Pending */
+
 .status-pending {
     background: #FFF3D8;
     color: #A36B13;
 }
+
+/* In Progress */
 
 .status-inprogress {
     background: #F0E9FF;
     color: #7651B5;
 }
 
+/* Contacted */
+
 .status-contacted {
     background: #E3F4F0;
     color: #26816B;
 }
+
+/* Resolved */
 
 .status-resolved {
     background: #E5F4E8;
@@ -212,6 +279,7 @@
     align-items: center;
     padding: 20px;
     background: rgba(15, 25, 42, 0.55);
+    backdrop-filter: blur(3px);
 }
 
 .enquiry-modal {
@@ -250,6 +318,7 @@
     color: #17243A;
     font-size: 22px;
     cursor: pointer;
+    transition: background 0.2s ease;
 }
 
 .modal-close:hover {
@@ -380,5 +449,9 @@
 
     .enquiry-filter select {
         width: 100%;
+    }
+
+    .enquiry-modal {
+        padding: 18px;
     }
 }
