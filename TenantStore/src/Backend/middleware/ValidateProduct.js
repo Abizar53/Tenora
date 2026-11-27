@@ -26,6 +26,7 @@ function validateProduct(product) {
         "price",
         "currency",
         "imageUrl",
+        "images",
         "category",
         "tags",
         "stock",
@@ -135,6 +136,33 @@ function validateProduct(product) {
                     .map(tag => tag.trim())
                     .filter(tag => tag !== "");
             }
+            
+            // Images validation
+            else if (field === "images") {
+
+                if (
+                    !Array.isArray(value) ||
+                    value.length > 5 ||
+                    !value.every(image =>
+                        image &&
+                        typeof image === "object" &&
+                        typeof image.url === "string" &&
+                        image.url.trim() !== "" &&
+                        typeof image.publicId === "string" &&
+                        image.publicId.trim() !== ""
+                    )
+                ) {
+                    return {
+                        valid: false,
+                        message: "Invalid product images."
+                    };
+                }
+
+    updatedFields.images = value.map(image => ({
+        url: image.url.trim(),
+        publicId: image.publicId.trim()
+    }));
+}
         }
     }
 
