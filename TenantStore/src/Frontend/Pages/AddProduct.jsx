@@ -22,7 +22,8 @@ function AddProduct() {
     dimensions: {widthMm: "", heightMm: "",depthMm: ""}
   });
 
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState("")
+  const [selectedImages, setSelectedImages]= useState([])   // variable containing images selected by user through file input 
 
   function handleChange(event) {
     const name = event.target.name;
@@ -32,6 +33,44 @@ function AddProduct() {
       [name]: value,
     }));
   }
+
+  function handleImageChange(event){
+    const files= Array.from(event.target.files)   // get selected files and cone=vert FileList into a normal array
+    if (selectedImages.length + files.length > 5){  // selected images are already selected and files are current selection
+      setMessage("U can upload a maximum of 5 images")
+      event.target.value=""   // cleans file input
+      return
+    }
+     const allowedTypes = ["image/jpeg", "image/png","image/webp"]
+      for (const file of files) {   // validate every selected files uploading 
+        if (!allowedTypes.includes(file.type)) {
+            setMessage("Only JPEG, PNG and WebP images are allowed.");
+            event.target.value = "";
+            return;
+        }
+         if (file.size > 5 * 1024 * 1024) {
+            setMessage("Each image must be smaller than 5 MB.");
+            event.target.value = "";
+            return;
+        }
+      }
+      setMessage("")   // clear previous error message
+
+      setSelectedImages((previousImages) => [   // add selected images to state 
+        ...previousImages,
+        ...files
+    ]);
+
+    event.target.value = ""  // reseting allows userto select same image again
+  }
+
+  function removeSelectedImage(index) {   // this removes an image from the selection without uploading it 
+    setSelectedImages((previousImages) =>
+        previousImages.filter((_, imageIndex) => imageIndex !== index)
+    );
+}
+
+
 
   
 async function handleSubmit(event) {
@@ -44,27 +83,71 @@ async function handleSubmit(event) {
     setMessage("Please login again.");
     return;
 }
-    const response = await fetch(
-      "https://tenora-7c00.onrender.com/api/products",
+  // STEP 1: Upload selected images to Cloudinary
+        let uploadedImages = []   // infomation retured by our backend 
+        if (selectedImages.length > 0) {
+
+            const formData = new FormData();   // js object used to send form data especially files 
+
+            // Append each selected image
+            selectedImages.forEach((image) => {
+                formData.append("images", image) // iterate thorugh every selected image and add the image to our form data
+            })
+
+    const imageResponse = await fetch(  // send images to backend 
+      "http://localhost:4052/api/products/images",
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          // "Content-Type": "application/json",  // because w eare sendning image data :multipart/form-data
           "Authorization": `Bearer ${token}`, // Include the token in the Authorization header
         },
-        body: JSON.stringify(product),
+        body: formData
       }
     );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      setMessage(data.message || "Could not save product.");
+    const imageData = await imageResponse.json();  // read backend response 
+    console.log("Image upload status:", imageResponse.status);
+console.log("Image upload response:", imageData);
+    if (!imageResponse.ok) {   // check for error
+      setMessage(imageData.message || "Image upload failed ");
       return;
     }
 
-    setMessage("Product added successfully!");
+    uploadedImages=imageData.images
+  }
 
+   // STEP 2: Prepare product data with uploaded images
+        const productData = {
+            ...product,
+            images: uploadedImages,
+
+            // Keep compatibility with existing single-image frontend
+            imageUrl: uploadedImages[0]?.url || product.imageUrl
+        }
+console.log("Uploaded images:", uploadedImages);
+console.log("Product data being sent:", productData);
+     // STEP 3: Save product in MongoDB
+        const response = await fetch(
+            "http://localhost:4052/api/products",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(productData)
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            setMessage(data.message || "Could not save product.");
+            return;
+        }
+
+         setMessage("Product added successfully!");
 
    setProduct({  // reset the form after successful submission
     name: "",
@@ -85,6 +168,8 @@ async function handleSubmit(event) {
     } // navigate to view products page after 1 second
     
   })
+  setSelectedImages([])
+
   setTimeout(() => {
   navigate("/view-products");
 }, 1000);
@@ -132,7 +217,7 @@ function handleApplySuggestion(field, value) {
 
       {/* Header */}
       <header className="add-product-header">
-        <h1>StoreHub</h1>
+        <h1>Tenora</h1>
 
         <button
           className="back-button"
@@ -342,47 +427,55 @@ function handleApplySuggestion(field, value) {
 
           </div>
 
-          {/* Product Image */}
-          <h3>Product Image</h3>
+                        {/* Product Images */}
+              <h3>Product Images</h3>
 
-          <div className="form-group">
-            <label htmlFor="imageUrl">Product Image URL</label>
-            <input
-              id="imageUrl"
-              name="imageUrl"
-              type="url"
-              placeholder="https://example.com/image.jpg"
-              value={product.imageUrl}
-              onChange={handleChange}
-            />
-          </div>
+              <div className="form-group">
+                  <label htmlFor="productImages">
+                      Upload Product Images
+                  </label>
 
-          {/* Message */}
-          {message && (
-            <p className="form-message" role="status">
-              {message}
-            </p>
-          )}
+                  <input
+                      id="productImages"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      multiple
+                      onChange={handleImageChange}
+                  />
 
-          {/* Buttons */}
-          <div className="form-actions">
+                  <small>
+                      Select up to 5 images. JPEG, PNG and WebP only. Maximum 5 MB per image.
+                  </small>
+              </div>
 
-            <button
-              type="submit"
-              className="save-product-button"
-            >
-              Save Product
-            </button>
+              {/* Image Preview */}
+              {selectedImages.length > 0 && (
+                  <div className="image-preview-container">
 
-            <button
-              type="button"
-              className="cancel-button"
-              onClick={() => navigate(-1)}
-            >
-              Cancel
-            </button>
+                      {selectedImages.map((image, index) => (
+                          <div className="image-preview" key={`${image.name}-${index}`}>
 
-          </div>
+                              <img
+                                  src={URL.createObjectURL(image)}
+                                  alt={`Product preview ${index + 1}`}
+                              />
+
+                              <button
+                                  type="button"
+                                  onClick={() => removeSelectedImage(index)}
+                              >
+                                  Remove
+                              </button>
+
+                          </div>
+                      ))}
+                    </div>
+              )}
+              <div className="form-actions">
+                  <button type="submit" className="save-product-button">
+                      Add Product
+                  </button>
+              </div>
 
         </form>
       </div>
