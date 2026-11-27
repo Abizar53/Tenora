@@ -1,5 +1,5 @@
 import Busboy from "busboy"
-import { verifyToken } from "../middleware/jwt"
+import { verifyToken } from "../middleware/jwt.js"
 
 async function uploadProductImage(request, response, cloudinary ){
 
@@ -26,6 +26,7 @@ async function uploadProductImage(request, response, cloudinary ){
     let tooLarge = false;
     let tooManyFiles = false;
     let uploadFailed = false;
+    let responseSent= false
 
     const allowedTypes = [
         "image/jpeg",
@@ -85,6 +86,7 @@ async function uploadProductImage(request, response, cloudinary ){
 
     // finishing 
     busboy.on("close", async()=>{
+         if (responseSent) return
         await Promise.all(uploadTasks)
         if(fileCount===0 || invalidFile || tooLarge || tooManyFiles || uploadFailed){
             // Delete uploaded images if the request failed
@@ -93,7 +95,8 @@ async function uploadProductImage(request, response, cloudinary ){
             )
             response.writeHead(400, { "Content-Type": "application/json" });
             response.end(JSON.stringify({
-                message: "Image upload failed. Check file type, size and number of images."
+                message: "Image upload failed. Check file type, size and number of images.",
+                image:uploadedImages
             }));
 
             return;
@@ -102,6 +105,7 @@ async function uploadProductImage(request, response, cloudinary ){
         // is all files succeds return image detail to frontend 
         response.writeHead(200,{"Content-Type":"application/json"})
         response.end(JSON.stringify({
+            responseSent: true,
             message:  "Images uploaded successfully.",
             images: uploadedImages
         }))
@@ -111,7 +115,9 @@ async function uploadProductImage(request, response, cloudinary ){
 busboy.on("error", (error) => {  // if something malformed , invalid formating or encounters and error
 
         console.error("Busboy error:", error);
-        if (!response.headersSent) { response.writeHead(400, {"Content-Type": "application/json" })
+        if (!response.headersSent) {
+            responseSent= true
+            response.writeHead(400, {"Content-Type": "application/json" })
             response.end(JSON.stringify({ message: "Could not process image upload." }))
         }
     })
