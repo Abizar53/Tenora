@@ -5,25 +5,22 @@ import "../CSS_files/enquiry.css"
 function EnquiryPage(){
     const [enquiries, setEnquiries]=useState([])
     const [loading, setLoading]=useState(true)
-    const [message, setmessage] = useState()
+    const [message, setMessage] = useState()
     const [newStatus, setNewStatus] = useState("");
     const [updating, setUpdating] = useState(false);
-
+    const [selectedEnquiry, setSelectedEnquiry] = useState(null);  //    // store the enquiry selected by the tenant
+   
+    const [filterStatus,setFilterStatus]= useState("ALL")  
     //calculate enquiry statistics
-    const totalEnquiries = enquiries.length;
-    const newEnquiries = enquiries.filter(
-        (enquiry)=> enquiry.status === "New").length  // filter(checks every Enquiry and keeps only enquiries whose status is NEW) and then count the length of the filtered array
-    const ContactedEnquiries = enquiries.filter((enquiry)=> enquiry.status === "Contacted").length
-    const inProgressEnquiries = enquiries.filter((enquiry)=> enquiry.status === "In-Progress").length
-    const pendingEnquiries = enquiries.filter((enquiry)=> enquiry.status === "Pending").length
-    const resolvedEnquiries = enquiries.filter((enquiry)=> enquiry.status === "Resolved").length
+  //  const totalEnquiries = enquiries.length;
+    //const newEnquiries = enquiries.filter( (enquiry)=> enquiry.status === "New").length  // filter(checks every Enquiry and keeps only enquiries whose status is NEW) and then count the length of the filtered array
+    //const ContactedEnquiries = enquiries.filter((enquiry)=> enquiry.status === "Contacted").length
+  //  const inProgressEnquiries = enquiries.filter((enquiry)=> enquiry.status === "In-Progress").length
+    //const pendingEnquiries = enquiries.filter((enquiry)=> enquiry.status === "Pending").length
+//    const resolvedEnquiries = enquiries.filter((enquiry)=> enquiry.status === "Resolved").length
  
-
-    // store the enquiry selected by the tenant
-    const [selectedEnquiry, setSelectedEnquiry] = useState(null);
-
     useEffect(()=>{
-    // fetch enquires from backend 
+    // fetch all enquires from backend 
     async function fetchEnquiries(){
         try{
             const token = sessionStorage.getItem("token")
@@ -40,11 +37,11 @@ function EnquiryPage(){
                     return;
                 }
 
-            setEnquiries(data);
+            setEnquiries(Array.isArray(data) ? data : []);
 
      }catch(error){
                 console.error("Error fetching ENQUIRY:", error);
-                
+                setMessage("Unable to connect to server");                
             } finally {
                 setLoading(false);
             }
@@ -54,15 +51,23 @@ function EnquiryPage(){
     },[]
     )
 
+     // Filter enquiries based on selected status
+    const filteredEnquiries = filterStatus === "All"
+            ? enquiries
+            : enquiries.filter(
+                (enquiry) => enquiry.status === filterStatus
+            );
 
-    if (loading) {
-        return <h2>Loading enquiries...</h2>;
-    }
+
+   // if (loading) {
+     //   return <h2>Loading enquiries...</h2>    }
 
 
     async function updateStatus(){
+         if (!selectedEnquiry || !newStatus) return;
         try{
             setUpdating(true);
+            setMessage("")
             const token = sessionStorage.getItem("token");
             const response = await fetch(`https://tenora-7c00.onrender.com/api/enquiries/${selectedEnquiry._id}/status`, {
                 method: "PATCH",
@@ -75,216 +80,247 @@ function EnquiryPage(){
                 
             const data= await response.json();
             if (!response.ok) {
-                setmessage(data.message || "Unable to update enquiry status");
+                setMessage(data.message || "Unable to update enquiry status");
                 return;
             }
 
-            // update the enquiry list
+            // update the enquiry list in existing list 
             setEnquiries((prevEnquiries) =>
                 prevEnquiries.map((enquiry) =>
                     enquiry._id === selectedEnquiry._id ?data.enquiry: enquiry))
             // Update the currently opened popup
         setSelectedEnquiry(data.enquiry);
 
-        setmessage("Enquiry status updated successfully");
+        setMessage("Enquiry status updated successfully");
 
     } catch (error) {
         console.error("Error updating status:", error);
-        setmessage("Unable to connect to server");
+        setMessage("Unable to connect to server");
 
     } finally {
         setUpdating(false);
     }
         
     }   
+     if (loading) {
+        return <h2>Loading enquiries...</h2>;
+    }
+
 return (
-    <div className="enquiries-page">
-        <button
-    className="back-button"
-    onClick={() => window.history.back()}
->
-    ← Back
-</button>
-        <div className="enquiries-header">
-            <h1>Customer Enquiries</h1>
-            <p>View enquiries received from customers about your products.</p>
-        </div>
+     <div className="enquiries-page">
 
-        
-{/* Enquiry Statistics */}
-<div className="enquiry-statistics">
+            {/* Page heading */}
+            <div className="enquiries-header">
+                <h1>Customer Enquiries</h1>
+                <p>Manage and respond to your customer enquiries.</p>
+            </div>
 
-    <div className="stat-card">
-        <h3>Total Enquiries</h3>
-        <h2>{totalEnquiries}</h2>
-    </div>
+            {/* Success and error messages */}
+            {message && (
+                <p className="enquiry-message">
+                    {message}
+                </p>
+            )}
 
-    <div className="stat-card">
-        <h3>New</h3>
-        <h2>{newEnquiries}</h2>
-    </div>
+            {/* All Enquiries */}
+            <section className="all-enquiries-section">
 
-    <div className="stat-card">
-        <h3>Contacted</h3>
-        <h2>{ContactedEnquiries}</h2>
-    </div>
-
-    <div className="stat-card">
-        <h3>Resolved</h3>
-        <h2>{resolvedEnquiries}</h2>
-    </div>
-
-    <div className="stat-card">
-        <h3>in-Progress</h3>
-        <h2>{inProgressEnquiries}</h2>
-    </div>
-
-    <div className="stat-card">
-        <h3>Pending </h3>
-        <h2>{pendingEnquiries}</h2>
-    </div>
-
-</div>
-
-
-       
-
-        {enquiries.length === 0 ? (
-
-            <p className="enquiries-message">
-                No enquiries received yet.
-            </p>
-
-        ) : (
-
-            <div className="enquiries-container">
-
-                {enquiries.map((enquiry) => (
-
-                    <div className="enquiry-card" key={enquiry._id} onClick={()=> {
-                        setSelectedEnquiry(enquiry);  {/* this selectes the card to popup */}
-                        setNewStatus(enquiry.status);  {/* this sets the status of the selected enquiry */}
-                        setmessage("");  {/* this clears any previous message */}
-                    }
-                    }>
-                          {/* Small label */}
-                         <span className="enquiry-label">
-                            PRODUCT ENQUIRY
-                        </span>
-
-                        <h3>{enquiry.productName}</h3>
-
+                <div className="all-enquiries-header">
+                    <div>
+                        <h2>All Enquiries</h2>
                         <p>
-                            <strong>Customer:</strong> {enquiry.customerName}
+                            {filteredEnquiries.length} enquiries found
                         </p>
-
-                        <p>
-                            <strong>Email:</strong> {enquiry.customerEmail}
-                        </p>
-
-                        <p>
-                            <strong>Message:</strong> {enquiry.message}
-                        </p>
-
-                        <p>
-                            <strong>Status:</strong>{" "}
-                            <span className="enquiry-status">
-                                {enquiry.status}
-                            </span>
-                        </p>
-
-                        <p>
-                            <strong>Date:</strong>{" "}
-                            {new Date(enquiry.createdAt).toLocaleDateString()}
-                        </p>
-
                     </div>
 
-                ))}
+                    {/* Status filter */}
+                    <div className="enquiry-filter">
+                        <label htmlFor="statusFilter">
+                            Filter by status:
+                        </label>
 
-            </div>
-        )}
-c
+                        <select
+                            id="statusFilter"
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                        >
+                            <option value="All">All Statuses</option>
+                            <option value="New">New</option>
+                            <option value="Pending">Pending</option>
+                            <option value="In-Progress">In Progress</option>
+                            <option value="Contacted">Contacted</option>
+                            <option value="Resolved">Resolved</option>
+                        </select>
+                    </div>
+                </div>
 
-         {/* Enquiry Details Popup */}
+                {/* Enquiries table */}
+                <div className="enquiry-table-container">
+
+                    <table className="enquiry-table">
+
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Customer</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {filteredEnquiries.length > 0 ? (
+
+                                filteredEnquiries.map((enquiry) => (
+
+                                    <tr
+                                        key={enquiry._id}
+                                        onClick={() => {
+                                            setSelectedEnquiry(enquiry);
+                                            setNewStatus(enquiry.status);
+                                            setMessage("");
+                                        }}
+                                    >
+                                        <td>{enquiry.productName}</td>
+
+                                        <td>{enquiry.customerName}</td>
+
+                                        <td>{enquiry.customerEmail}</td>
+
+                                        <td>
+                                            <span
+                                                className={`status-badge status-${enquiry.status
+                                                    .toLowerCase()
+                                                    .replaceAll("-", "")}`}
+                                            >
+                                                {enquiry.status}
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            {enquiry.createdAt
+                                                ? new Date(enquiry.createdAt).toLocaleDateString()
+                                                : "N/A"}
+                                        </td>
+                                    </tr>
+
+                                ))
+
+                            ) : (
+
+                                <tr>
+                                    <td colSpan="5" className="no-enquiries">
+                                        No {filterStatus === "All" ? "" : filterStatus + " "}
+                                        enquiries found.
+                                    </td>
+                                </tr>
+
+                            )}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            {/* Enquiry Details Modal */}
             {selectedEnquiry && (
 
-                <div className="enquiry-overlay">
+                <div
+                    className="enquiry-overlay"
+                    onClick={() => setSelectedEnquiry(null)}
+                >
 
-                    <div className="enquiry-modal">
+                    <div
+                        className="enquiry-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
 
-                        <h2>Enquiry Details</h2>
+                        <div className="modal-header">
+                            <h2>Enquiry Details</h2>
 
-                        <button
-                            className="close-button"
-                            onClick={() => setSelectedEnquiry(null)}
-                        >
-                            ×
-                        </button>
-
-                        <hr />
-
-                        <h3>{selectedEnquiry.productName}</h3>
-
-                        <p>
-                            <strong>Customer:</strong>{" "}
-                            {selectedEnquiry.customerName}
-                        </p>
-
-                        <p>
-                            <strong>Email:</strong>{" "}
-                            {selectedEnquiry.customerEmail}
-                        </p>
-
-                        <p>
-                            <strong>Message:</strong>
-                        </p>
-
-                        <div className="enquiry-full-message">
-                            {selectedEnquiry.message}
+                            <button
+                                className="modal-close"
+                                onClick={() => setSelectedEnquiry(null)}
+                            >
+                                ×
+                            </button>
                         </div>
 
-                        <p>
-                            <strong>Status:</strong>{" "}
-                            {selectedEnquiry.status}
-                        </p>
-                        
-<div className="status-update-section">
+                        <div className="enquiry-details">
 
-    <label>Update Enquiry Status</label>
+                            <p>
+                                <strong>Product:</strong>{" "}
+                                {selectedEnquiry.productName}
+                            </p>
 
-    <select
-        value={newStatus}
-        onChange={(event) => setNewStatus(event.target.value)}
-    >
-  
-        <option value="Contacted">Contacted</option>
-        <option value="In-Progress">In-Progress</option>
-        <option value="Pending">Pending</option>
-        <option value="Resolved">Resolved</option>
-    </select>
+                            <p>
+                                <strong>Customer:</strong>{" "}
+                                {selectedEnquiry.customerName}
+                            </p>
 
-    <button
-        onClick={updateStatus}
-        disabled={updating || newStatus === selectedEnquiry.status}
-    >
-        {updating ? "Updating..." : "Update Status"}
-    </button>
+                            <p>
+                                <strong>Email:</strong>{" "}
+                                {selectedEnquiry.customerEmail}
+                            </p>
 
-</div>
+                            <p>
+                                <strong>Message:</strong>
+                            </p>
 
+                            <div className="enquiry-customer-message">
+                                {selectedEnquiry.message}
+                            </div>
 
-                        <p>
-                            <strong>Enquiry Date:</strong>{" "}
-                            {new Date(selectedEnquiry.createdAt).toLocaleString()}
-                        </p>
+                            <p>
+                                <strong>Current Status:</strong>{" "}
+                                {selectedEnquiry.status}
+                            </p>
 
-                        <button
-                            className="close-modal"
-                            onClick={() => setSelectedEnquiry(null)}
-                        >
-                            Close
-                        </button>
+                            <p>
+                                <strong>Date:</strong>{" "}
+                                {selectedEnquiry.createdAt
+                                    ? new Date(selectedEnquiry.createdAt).toLocaleDateString()
+                                    : "N/A"}
+                            </p>
+
+                        </div>
+
+                        {/* Update status */}
+                        <div className="update-enquiry-status">
+
+                            <label htmlFor="newStatus">
+                                Update Status
+                            </label>
+
+                            <select
+                                id="newStatus"
+                                value={newStatus}
+                                onChange={(e) => setNewStatus(e.target.value)}
+                            >
+                                <option value="New">New</option>
+                                <option value="Contacted">Contacted</option>
+                                <option value="In-Progress">In Progress</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Resolved">Resolved</option>
+                            </select>
+
+                            <button
+                                onClick={updateStatus}
+                                disabled={
+                                    updating ||
+                                    newStatus === selectedEnquiry.status
+                                }
+                            >
+                                {updating ? "Updating..." : "Update Status"}
+                            </button>
+
+                        </div>
 
                     </div>
 
@@ -292,8 +328,8 @@ c
 
             )}
 
-    </div>
-);
+        </div>
+    );
 }
 
 export default EnquiryPage
