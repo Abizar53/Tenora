@@ -18,6 +18,10 @@ const productSchema= new mongoose.Schema( {  // tells Node.js application what a
       heightMm: { type: Number, default: 0 },
       depthMm: { type: Number, default: 0 },
     },
+    images:{
+      type:[{ url :{type:String, required :true}, publicId:{type:String, required:true}}],
+      default:[]
+    },
     // Store the ID of the tenant who owns this product
     tenantId: {
         type: String,
