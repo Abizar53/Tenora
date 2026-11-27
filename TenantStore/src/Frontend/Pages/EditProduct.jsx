@@ -14,6 +14,9 @@ import ChatLayout from "./ChatBot/ChatLayout.jsx";
     const [loading, setLoading] = useState(false); // State to indicate loading status
     const existingProduct = location.state?.product; // Access the existing product details passed from the previous page ie: :get the selected product from view details
     const [updatedFields, setUpdatedFields] = useState({});
+    const [existingImages, setExistingImages] = useState(  // existingImages stores images already saved in MongoDB
+    existingProduct?.images || [] );
+    const [selectedImages, setSelectedImages] = useState([]);   //selectedImages stores newly selected files that still need uploading.
 
 
     const [product, setProduct] = useState(() => ({
@@ -69,8 +72,51 @@ function handleDimensionChange(event) {
 
        setUpdatedFields((previousFields) => ({
         ...previousFields,
-        [`dimensions.${name}`]: value
+        dimensions:{ ...previousFields.dimensions,
+            [name]: Number(value)
+        }
     }));
+}
+
+function handleImageChange(event) {
+    const files = Array.from(event.target.files);
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+    if (existingImages.length + selectedImages.length + files.length > 5) {
+        setMessage("You can upload a maximum of 5 images.");
+        event.target.value = "";
+        return;
+    }
+
+    for (const file of files) {
+        if (!allowedTypes.includes(file.type)) {
+            setMessage("Only JPEG, PNG and WebP images are allowed.");
+            event.target.value = "";
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            setMessage("Each image must be smaller than 5 MB.");
+            event.target.value = "";
+            return;
+        }
+    }
+
+    setMessage("");
+    setSelectedImages(previous => [...previous, ...files]);
+    event.target.value = "";
+}
+
+function removeExistingImage(index) {
+    setExistingImages(previous =>
+        previous.filter((_, imageIndex) => imageIndex !== index)
+    );
+}
+
+function removeSelectedImage(index) {
+    setSelectedImages(previous =>
+        previous.filter((_, imageIndex) => imageIndex !== index)
+    );
 }
 
 // submit updated product / send request to backend to upate the database
@@ -85,14 +131,72 @@ async function handleSubmit(event) {
     setMessage("Please login again.");
     return;
 }
-console.log("Product:", product);
-console.log("Updated fields:", updatedFields);
-console.log("Updated fields keys:", Object.keys(updatedFields));
-    const response = await fetch(`https://tenora-7c00.onrender.com/api/products/${id}`, {
+
+     // Prepare only the fields that have changed
+    const fieldsToUpdate = { ...updatedFields }
+    // Convert numeric fields from strings to numbers
+   const numericFields = ["price", "stock", "weightGrams"];
+
+console.log("Numeric fields:", numericFields);
+console.log("Updated fields:", fieldsToUpdate);
+
+numericFields.forEach(field => {
+    if (Object.hasOwn(fieldsToUpdate, field)) {
+        fieldsToUpdate[field] = Number(fieldsToUpdate[field]);
+    }
+});
+        let uploadedImages = [];    
+         if (selectedImages.length > 0) {
+            const formData = new FormData();
+
+            selectedImages.forEach(image => {
+                formData.append("images", image);
+            })
+
+         const imageResponse = await fetch(`http://localhost:4052/api/products/images`,
+                    {method: "POST",
+                    headers: {Authorization: `Bearer ${token}`},
+                    body: formData
+                }
+            )
+
+            const imageData = await imageResponse.json();
+
+            if (!imageResponse.ok) {
+                setMessage(imageData.message || "Image upload failed.");
+                return
+            }
+
+            uploadedImages = imageData.images
+        }
+
+        // Check whether the image list has changed
+        const originalImageCount = existingProduct?.images?.length || 0;
+
+        const imagesChanged =
+            selectedImages.length > 0 ||
+            existingImages.length !== originalImageCount;
+
+        if (imagesChanged) {
+            const finalImages = [
+                ...existingImages,
+                ...uploadedImages
+            ];
+
+            fieldsToUpdate.images = finalImages;
+
+            // Keep imageUrl updated for older components
+            fieldsToUpdate.imageUrl = finalImages[0]?.url || "";
+        }
+
+        console.log("Fields being updated:", fieldsToUpdate);
+
+        // Send PATCH request
+    const response = await fetch(`http://localhost:4052/api/products/${id}`, {
         method: 'PATCH', headers: {
         "Content-Type": "application/json",
         "Authorization":`Bearer ${token}` }, 
-        body: JSON.stringify(updatedFields)
+        body: JSON.stringify(fieldsToUpdate)
     })
 
     const data=await response.json()
@@ -282,12 +386,19 @@ function handleApplySuggestion(field, value) {
                                     <input
                                         type="checkbox"
                                         checked={product.isAvailable}
-                                        onChange={(event) =>
-                                            setProduct((previousProduct) => ({
-                                                ...previousProduct,
-                                                isAvailable: event.target.checked
-                                            }))
-                                        }
+                                       onChange={(event) => {
+                                        const value = event.target.checked;
+
+                                        setProduct(previousProduct => ({
+                                            ...previousProduct,
+                                            isAvailable: value
+                                        }));
+
+                                        setUpdatedFields(previousFields => ({
+                                            ...previousFields,
+                                            isAvailable: value
+                                        }));
+                                    }}
                                     />
                                     Available for customers
                                 </label>
@@ -364,35 +475,89 @@ function handleApplySuggestion(field, value) {
                     </section>
 
 
-                    {/* PRODUCT IMAGE */}
+                  {/* PRODUCT IMAGES */}
                     <section className="form-section">
 
-                        <h3>04 — Product Image</h3>
+                        <h3>04 — Product Images</h3>
 
+                        {/* Existing images */}
                         <div className="form-group">
-                            <label>Image URL</label>
-                            <input
-                                type="url"
-                                name="imageUrl"
-                                value={product.imageUrl}
-                                onChange={handleChange}
-                                placeholder="Enter product image URL"
-                            />
+                            <label>Current Product Images</label>
+
+                            {existingImages.length > 0 ? (
+                                <div className="edit-image-grid">
+                                    {existingImages.map((image, index) => (
+                                        <div className="edit-image-card" key={image.publicId}>
+                                            <img src={image.url} alt={`Product ${index + 1}`} />
+
+                                            <button
+                                                type="button"
+                                                onClick={() => removeExistingImage(index)}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <>
+                                    {product.imageUrl && (
+                                        <div className="edit-image-card legacy-image">
+                                            <img src={product.imageUrl} alt="Current product" />
+                                            <small>Legacy product image</small>
+                                        </div>
+                                    )}
+
+                                    {!product.imageUrl && (
+                                        <p className="no-product-images">No existing images.</p>
+                                    )}
+                                </>
+                            )}
                         </div>
 
-                        {product.imageUrl && (
-                            <div className="edit-image-preview">
-                                <img
-                                    src={product.imageUrl}
-                                    alt="Product preview"
-                                />
-                            </div>
-                        )}
+                        {/* Select new images */}
+                        <div className="form-group">
+                            <label htmlFor="editProductImages">Add New Images</label>
 
-                    </section>
-                          <div className="edit-form-actions">
+                            <input
+                                id="editProductImages"
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                multiple
+                                onChange={handleImageChange}
+                            />
 
-                        <button
+                            <small>
+                                Maximum 5 images in total. JPEG, PNG and WebP only.
+                                Maximum 5 MB per image.
+                            </small>
+                        </div>
+
+                            {/* New image previews */}
+                            {selectedImages.length > 0 && (
+                                <div className="edit-image-grid">
+                                    {selectedImages.map((image, index) => (
+                                        <div className="edit-image-card" key={`${image.name}-${index}`}>
+                                            <img
+                                                src={URL.createObjectURL(image)}
+                                                alt={`New product ${index + 1}`}
+                                            />
+
+                                            <button
+                                                type="button"
+                                                onClick={() => removeSelectedImage(index)}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                        </section>     
+                           <div className="edit-form-actions">
+
+                            <button
                             type="button"
                             className="edit-cancel-button"
                             onClick={() => navigate(-1)}
