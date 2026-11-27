@@ -37,23 +37,52 @@ function ViewProducts() {
             } finally {
                 setloading(false);
             }
-        }
-            fetchProducts();
+        }        
+        
+        fetchProducts()
         },[])
-        return (
+      return (
         <div className="view-products-page">
-            <header className="products-header">
-                <h1>My Products</h1>
 
-                <button onClick={() => navigate("/dashboard")}>
-                    Back to Dashboard
-                </button>
+            <header className="products-header">
+                <div>
+                    <h1>My Products</h1>
+                    <p>Manage and keep track of your store products.</p>
+                </div>
+
+                <div className="products-header-actions">
+                    <button
+                        className="add-product-button"
+                        onClick={() => navigate("/add-product")}
+                    >
+                        + Add Product
+                    </button>
+
+                    <button
+                        className="back-dashboard-button"
+                        onClick={() => navigate("/dashboard")}
+                    >
+                        Back to Dashboard
+                    </button>
+                </div>
             </header>
 
             <main className="products-content">
-                {loading && <p>Loading products...</p>}
 
-                {!loading && message && <p>{message}</p>}
+                {!loading && !message && products.length > 0 && (
+                    <div className="products-summary">
+                        <span>Total Products</span>
+                        <strong>{products.length}</strong>
+                    </div>
+                )}
+
+                {loading && (
+                    <p className="products-feedback">Loading products...</p>
+                )}
+
+                {!loading && message && (
+                    <p className="products-feedback error-message">{message}</p>
+                )}
 
                 {!loading && !message && products.length === 0 && (
                     <div className="empty-products">
@@ -68,46 +97,112 @@ function ViewProducts() {
 
                 {!loading && !message && products.length > 0 && (
                     <div className="products-grid">
-                        {products.map((product) => (
-                            <div className="product-card" key={product._id}>
-                                {product.imageUrl && (
-                                    <img
-                                        src={product.imageUrl}
-                                        alt={product.name}
-                                    />
+
+                       {products.map((product) => {
+
+    const productImages = product.images?.length > 0
+        ? product.images.map((image) => image.url)
+        : product.imageUrl
+            ? [product.imageUrl]
+            : [];
+            console.log("Product name:", product.name);
+            console.log("Images received:", product.images);
+            console.log("Image URLs:", productImages);
+
+    return (
+        <div className="product-card" key={product._id}>
+                                <div className="product-image-container">
+
+                                {productImages.length > 0 ? (
+
+                                    <div className="product-image-gallery">
+
+                                        {/* Main Product Image */}
+                                        <img
+                                            className="main-product-image"
+                                            src={productImages[0]}
+                                            alt={product.name}
+                                        />
+
+                                        {/* Additional Images */}
+                                        {productImages.length > 1 && (
+                                            <div className="product-image-thumbnails">
+
+                                                {productImages.slice(1).map((image, index) => (
+                                                    <img
+                                                        key={index}
+                                                        src={image}
+                                                        alt={`${product.name} ${index + 2}`}
+                                                    />
+                                                ))}
+
+                                            </div>
+                                        )}
+
+                                    </div>
+
+                                ) : (
+                                    <div className="product-image-placeholder">
+                                        No Image
+                                    </div>
                                 )}
 
-                                <h3>{product.name}</h3>
+                                <span
+                                    className={`product-availability ${
+                                        product.isAvailable ? "available" : "unavailable"
+                                    }`}
+                                >
+                                    {product.isAvailable ? "Available" : "Unavailable"}
+                                </span>
 
-                                <p>{product.description}</p>
+                            </div>
 
-                                <p>
-                                    Price: ₹{product.price ?? product.priceCents}
-                                </p>
+                                <div className="product-card-content">
 
-                                <p>
-                                    Category: {product.category || "Uncategorized"}
-                                </p>
+                                    <p className="product-category">
+                                        {product.category || "Uncategorized"}
+                                    </p>
 
-                                <p>
-                                    Stock: {product.stock ?? 0}
-                                </p>
-                                <button
+                                    <h3>{product.name}</h3>
+
+                                    <p className="product-description">
+                                        {product.description || "No description provided."}
+                                    </p>
+
+                                    <div className="product-price">
+                                        ₹{product.price ?? product.priceCents}
+                                    </div>
+
+                                    <div className="product-stock">
+                                        <span>Stock</span>
+                                        <strong>
+                                            {product.stock ?? 0} units
+                                        </strong>
+                                    </div>
+
+                                    <button
+                                        className="edit-product-button"
                                         onClick={() =>
                                             navigate(`/edit-product/${product._id}`, {
-                                                state: { product: product }   //existing product details to that page.
+                                                state: { product: product }
                                             })
                                         }
                                     >
                                         Edit Product
                                     </button>
+
+                                </div>
                             </div>
-                        ))}
+                                )
+                            })}
+
                     </div>
                 )}
+
             </main>
         </div>
     );
 }
+
 
 export default ViewProducts;
