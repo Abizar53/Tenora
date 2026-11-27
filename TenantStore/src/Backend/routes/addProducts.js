@@ -64,17 +64,19 @@ export async function addProduct(request,response) {
 
       //CREATE A NEW PRODUCT RECORD
       const newProduct = new productModel({
-        id: randomUUID(),
-        name: product.name.trim(),
-        category: product.category.trim(),
-        description: product.description.trim(),
-        price: Number(product.price),
-        currency: product.currency?.trim() || "INR",
-        stock: Number(product.stock),
-        imageUrl: product.imageUrl?.trim() || "",
-        // get tenant id from verifiedn jwt authentication
-        tenantId: request.tenant.id,  
-      })
+      id: randomUUID(),
+      name: product.name.trim(),
+      category: product.category.trim(),
+      description: product.description.trim(),
+      price: Number(product.price),
+      currency: product.currency?.trim() || "INR",
+      stock: Number(product.stock),
+      // Save the first image separately for backward compatibility
+      imageUrl: product.images?.[0]?.url || product.imageUrl?.trim() || "",
+      // Save all uploaded product images
+      images: Array.isArray(product.images) ? product.images : [],
+      tenantId: request.tenant.id,
+  })
       // save product to mongodb
       const savedProduct = await newProduct.save()  // save the new product to the database
      response.writeHead(201, {
